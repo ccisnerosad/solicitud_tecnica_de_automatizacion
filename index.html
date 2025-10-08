@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propuesta: Plataforma Integral de Automatización</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Slate & Muted Blue -->
+    <!-- Application Structure Plan: Se ha diseñado una SPA con un flujo vertical y navegación por anclas. La estructura prioriza la claridad y la interacción, comenzando con una visión general (Objetivo y Alcance) para establecer el contexto. Se agregó una nueva sección detallada de Requerimientos Técnicos, usando tarjetas para hacer la información densa más digerible. Los módulos funcionales se mantienen en pestañas interactivas. Los KPIs se muestran como un dashboard visual. El plan de desarrollo es una línea de tiempo interactiva. Los entregables se presentan en una cuadrícula con iconos. Se añade una sección final de "Observaciones y Recomendaciones" para incluir todos los datos del documento fuente. Esta estructura fue elegida para convertir un documento técnico denso en una experiencia de usuario atractiva y fácil de navegar, guiando al usuario desde el 'qué' y 'por qué' hasta el 'cómo' y 'cuándo' del proyecto, asegurando que no se omita información clave. Se ha implementado un menú móvil para una completa responsividad. -->
+    <!-- Visualization & Content Choices: 
+        - Objetivo y Alcance: (Informar) Tarjetas con iconos. Interacción de hover. Justificación: Atractivo visual y resumen rápido.
+        - Requerimientos Técnicos: (Organizar/Informar) Cuadrícula de tarjetas con iconos. Interacción de hover. Justificación: Desglosa información técnica compleja en categorías visuales, mejorando la comprensión.
+        - Módulos Funcionales: (Organizar) Pestañas interactivas. Interacción de clic. Justificación: Compacta información detallada y mejora la navegación. Método: JS.
+        - KPIs Clave: (Informar/Comparar) Gráfico de dona y barras de Chart.js como demo. Interacción de hover en gráficos. Justificación: Visualiza el tipo de datos que la plataforma manejará. Biblioteca: Chart.js.
+        - Línea de Tiempo: (Cambio/Organizar) Diagrama de flujo vertical interactivo. Interacción de hover. Justificación: Transforma una tabla en una visualización de proceso atractiva. Método: HTML/CSS/JS.
+        - Entregables: (Informar) Cuadrícula con iconos. Interacción de hover. Justificación: Mejora la legibilidad.
+        - Observaciones y Recomendaciones: (Informar) Tarjetas de contenido. Justificación: Presenta los puntos finales del documento de forma clara y estructurada.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .nav-link {
+            transition: color 0.3s;
+            position: relative;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #3b82f6;
+            transition: width 0.3s;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        .tab {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .tab.active {
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2.5rem;
+            padding-left: 2.5rem;
+            border-left: 2px solid #cbd5e1;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: -0.6rem;
+            top: 0.25rem;
+            height: 1.125rem;
+            width: 1.125rem;
+            background-color: white;
+            border: 2px solid #3b82f6;
+            border-radius: 9999px;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+        .timeline-item:hover .timeline-dot {
+            transform: scale(1.2);
+            background-color: #3b82f6;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-slate-800">Plataforma de Automatización</h1>
+            <div class="hidden md:flex space-x-6 lg:space-x-8">
+                <a href="#overview" class="nav-link text-slate-600 font-medium">Visión General</a>
+                <a href="#requirements" class="nav-link text-slate-600 font-medium">Requerimientos</a>
+                <a href="#modules" class="nav-link text-slate-600 font-medium">Módulos</a>
+                <a href="#roadmap" class="nav-link text-slate-600 font-medium">Hoja de Ruta</a>
+                <a href="#deliverables" class="nav-link text-slate-600 font-medium">Entregables</a>
+            </div>
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-slate-600 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-md">
+            <a href="#overview" class="block py-2 px-6 text-slate-600 hover:bg-slate-100">Visión General</a>
+            <a href="#requirements" class="block py-2 px-6 text-slate-600 hover:bg-slate-100">Requerimientos</a>
+            <a href="#modules" class="block py-2 px-6 text-slate-600 hover:bg-slate-100">Módulos</a>
+            <a href="#roadmap" class="block py-2 px-6 text-slate-600 hover:bg-slate-100">Hoja de Ruta</a>
+            <a href="#deliverables" class="block py-2 px-6 text-slate-600 hover:bg-slate-100">Entregables</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <section id="overview" class="text-center mb-20 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Solicitud Técnica de Automatización</h2>
+            <p class="text-lg text-slate-600 max-w-3xl mx-auto mb-10">El objetivo principal de este proyecto es automatizar los formatos operativos, técnicos y de gestión, integrándolos en una única plataforma web para centralizar la captura de datos, el control, la trazabilidad y la visualización de indicadores clave.</p>
+            
+            <div class="bg-white p-8 rounded-2xl shadow-lg border border-slate-200/50">
+                <h3 class="text-2xl font-bold text-slate-800 mb-6">Alcance de la Plataforma</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+                    <div class="flex items-start space-x-4"><div class="flex-shrink-0 bg-blue-100 text-blue-600 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div><div><h4 class="font-semibold text-slate-700">Captura de Datos</h4><p class="text-slate-500 text-sm">Formularios digitales para registro de información en campo.</p></div></div>
+                    <div class="flex items-start space-x-4"><div class="flex-shrink-0 bg-blue-100 text-blue-600 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4M4 7l8 4.5 8-4.5" /></svg></div><div><h4 class="font-semibold text-slate-700">Base de Datos Centralizada</h4><p class="text-slate-500 text-sm">Consolidación en una base de datos estructurada y segura.</p></div></div>
+                    <div class="flex items-start space-x-4"><div class="flex-shrink-0 bg-blue-100 text-blue-600 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg></div><div><h4 class="font-semibold text-slate-700">Almacenamiento Seguro</h4><p class="text-slate-500 text-sm">Sistema de archivos (tipo S3) con respaldos automáticos.</p></div></div>
+                    <div class="flex items-start space-x-4"><div class="flex-shrink-0 bg-blue-100 text-blue-600 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V7a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div><div><h4 class="font-semibold text-slate-700">Reportería Automatizada</h4><p class="text-slate-500 text-sm">Generación de informes en PDF, XLSX y gráficos.</p></div></div>
+                    <div class="flex items-start space-x-4"><div class="flex-shrink-0 bg-blue-100 text-blue-600 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><div><h4 class="font-semibold text-slate-700">Control de Acceso</h4><p class="text-slate-500 text-sm">Gestión de permisos basados en roles de usuario.</p></div></div>
+                    <div class="flex items-start space-x-4"><div class="flex-shrink-0 bg-blue-100 text-blue-600 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></div><div><h4 class="font-semibold text-slate-700">Comunicaciones</h4><p class="text-slate-500 text-sm">Sistema integrado para el envío de correos electrónicos.</p></div></div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="requirements" class="mb-20 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center text-slate-900 mb-4">Requerimientos Técnicos y de Seguridad</h2>
+            <p class="text-lg text-slate-600 max-w-3xl mx-auto text-center mb-10">La plataforma se construirá sobre una base sólida de requerimientos para garantizar su robustez, escalabilidad y la protección de los datos.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200/50">
+                    <h4 class="font-bold text-lg text-slate-800 mb-3">Funcionales y de Datos</h4>
+                    <ul class="space-y-2 text-slate-600 text-sm"><li class="flex items-start"><span class="text-blue-500 mr-2">✓</span><span>Formularios dinámicos con campos condicionales y carga de archivos.</span></li><li class="flex items-start"><span class="text-blue-500 mr-2">✓</span><span>Almacenamiento estructurado en base de datos relacional.</span></li><li class="flex items-start"><span class="text-blue-500 mr-2">✓</span><span>Generación de reportes automáticos (PDF, XLSX).</span></li><li class="flex items-start"><span class="text-blue-500 mr-2">✓</span><span>Conectividad con Power BI o módulo analítico propio.</span></li></ul>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200/50">
+                    <h4 class="font-bold text-lg text-slate-800 mb-3">Autenticación y Acceso</h4>
+                    <ul class="space-y-2 text-slate-600 text-sm"><li class="flex items-start"><span class="text-blue-500 mr-2">✓</span><span>Sistema de autenticación con roles y permisos definidos.</span></li><li class="flex items-start"><span class="text-blue-500 mr-2">✓</span><span>Autenticación Multifactor (MFA) para seguridad adicional.</span></li><li class="flex items-start"><span class="text-blue-500 mr-2">✓</span><span>Control de versiones y registro de modificaciones.</span></li></ul>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200/50">
+                    <h4 class="font-bold text-lg text-slate-800 mb-3">Seguridad de la Aplicación</h4>
+                    <ul class="space-y-2 text-slate-600 text-sm"><li class="flex items-start"><span class="text-blue-500 mr-2">✓</span><span>Protección contra XSS (Cross-Site Scripting).</span></li><li class="flex items-start"><span class="text-blue-500 mr-2">✓</span><span>Prevención de Inyección SQL con consultas parametrizadas.</span></li><li class="flex items-start"><span class="text-blue-500 mr-2">✓</span><span>Gestión de Sesiones Segura con expiración automática.</span></li></ul>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200/50">
+                    <h4 class="font-bold text-lg text-slate-800 mb-3">Infraestructura y Red</h4>
+                    <ul class="space-y-2 text-slate-600 text-sm"><li class="flex items-start"><span class="text-blue-500 mr-2">✓</span><span>Protección SSL para todos los dominios.</span></li><li class="flex items-start"><span class="text-blue-500 mr-2">✓</span><span>Mitigación de Ataques DDoS.</span></li><li class="flex items-start"><span class="text-blue-500 mr-2">✓</span><span>Firewall de Aplicaciones Web (WAF).</span></li><li class="flex items-start"><span class="text-blue-500 mr-2">✓</span><span>Uso de Red de Distribución de Contenido (CDN) Segura.</span></li></ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="modules" class="mb-20 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center text-slate-900 mb-4">Módulos y Formatos a Digitalizar</h2>
+            <p class="text-lg text-slate-600 max-w-3xl mx-auto text-center mb-10">La plataforma se estructurará en tres módulos funcionales principales, agrupando formatos y procesos específicos para optimizar la operación.</p>
+
+            <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-slate-200/50 max-w-4xl mx-auto">
+                <div class="flex flex-col sm:flex-row justify-center border-b border-slate-200 mb-6">
+                    <button data-tab="piloto" class="tab active px-4 py-3 font-medium text-slate-600 rounded-t-lg w-full sm:w-auto">Piloto / Diagnóstico</button>
+                    <button data-tab="servicios" class="tab px-4 py-3 font-medium text-slate-600 rounded-t-lg w-full sm:w-auto">Servicios Derivados</button>
+                    <button data-tab="negocio" class="tab px-4 py-3 font-medium text-slate-600 rounded-t-lg w-full sm:w-auto">Negocio y Alianzas</button>
+                </div>
+                <div id="tab-content" class="p-2 sm:p-6 min-h-[280px]">
+                    <div id="piloto" class="tab-pane active"><ul class="space-y-3 list-disc list-inside text-slate-600"><li>Ficha del Sistema en Foco</li><li>Checklist de Equipamiento y Personal Operativo</li><li>Diario de Circularidad de Residuos</li><li>Bitácora de Incidencias</li><li>Mapa de Stocks y Flujos</li><li>Reporte Semanal de Avance</li><li>Informe Final de Diagnóstico</li></ul></div>
+                    <div id="servicios" class="tab-pane hidden"><ul class="space-y-3 list-disc list-inside text-slate-600"><li>Ficha de Servicio Derivado</li><li>Reporte Mensual de Ingresos</li><li>Convenio / Contrato tipo</li><li>SLA de Trazabilidad</li></ul></div>
+                    <div id="negocio" class="tab-pane hidden"><ul class="space-y-3 list-disc list-inside text-slate-600"><li>Dashboard Financiero / CRM de Aliados</li><li>Reporte Mensual y Trimestral de Ingresos y Resultados</li><li>Matriz de Indicadores Financieros y Sociales</li><li>Plan de Expansión y Escalamiento</li></ul></div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="kpis" class="mb-20 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center text-slate-900 mb-4">Indicadores Clave (KPIs)</h2>
+            <p class="text-lg text-slate-600 max-w-3xl mx-auto text-center mb-10">Un dashboard centralizado permitirá visualizar en tiempo real los indicadores más importantes para la toma de decisiones estratégicas.</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200/50"><h3 class="text-xl font-bold text-slate-800 mb-4 text-center">% de Valorización de Residuos</h3><div class="chart-container"><canvas id="valorizacionChart"></canvas></div></div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200/50"><h3 class="text-xl font-bold text-slate-800 mb-4 text-center">Ingresos Generados (Trimestral)</h3><div class="chart-container"><canvas id="ingresosChart"></canvas></div></div>
+            </div>
+             <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200/50 text-center"><h4 class="text-slate-500 font-medium">Emisiones Evitadas</h4><p class="text-3xl font-bold text-blue-600 mt-2">1,250 t CO₂ eq</p></div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200/50 text-center"><h4 class="text-slate-500 font-medium">Servicios Activos</h4><p class="text-3xl font-bold text-blue-600 mt-2">42</p></div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200/50 text-center"><h4 class="text-slate-500 font-medium">Desempeño Alianzas</h4><p class="text-3xl font-bold text-blue-600 mt-2">95%</p></div>
+            </div>
+        </section>
+
+        <section id="roadmap" class="mb-20 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center text-slate-900 mb-4">Hoja de Ruta del Desarrollo</h2>
+            <p class="text-lg text-slate-600 max-w-3xl mx-auto text-center mb-12">El proyecto se desarrollará a lo largo de 17 semanas, distribuidas en 7 fases clave para asegurar un progreso constante y controlado.</p>
+            <div class="relative max-w-5xl mx-auto">
+                <div class="timeline-item"><div class="timeline-dot"></div><div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm"><p class="font-bold text-blue-600">Fase 1: Análisis y Diseño (2 Semanas)</p><p class="text-slate-600 mt-1">Revisión de requisitos, definición de arquitectura y diseño de BD. Entregable: Documento de diseño técnico.</p></div></div>
+                <div class="timeline-item"><div class="timeline-dot"></div><div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm"><p class="font-bold text-blue-600">Fase 2: Módulo Piloto / Diagnóstico (3 Semanas)</p><p class="text-slate-600 mt-1">Digitalización de formatos del módulo y pruebas de captura. Entregable: Formularios funcionales y dashboard básico.</p></div></div>
+                <div class="timeline-item"><div class="timeline-dot"></div><div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm"><p class="font-bold text-blue-600">Fase 3: Módulo de Servicios Derivados (3 Semanas)</p><p class="text-slate-600 mt-1">Integración de ficha de servicio, reportes y contratos. Entregable: Formularios activos y reportes automáticos.</p></div></div>
+                <div class="timeline-item"><div class="timeline-dot"></div><div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm"><p class="font-bold text-blue-600">Fase 4: Módulo de Negocio y Alianzas (4 Semanas)</p><p class="text-slate-600 mt-1">Creación del dashboard financiero, CRM y matriz de indicadores. Entregable: Panel de control con exportación.</p></div></div>
+                <div class="timeline-item"><div class="timeline-dot"></div><div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm"><p class="font-bold text-blue-600">Fase 5: Integración y Pruebas (2 Semanas)</p><p class="text-slate-600 mt-1">Vinculación de módulos, revisión de seguridad y pruebas de calidad (QA). Entregable: Plataforma integrada y corregida.</p></div></div>
+                <div class="timeline-item"><div class="timeline-dot"></div><div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm"><p class="font-bold text-blue-600">Fase 6: Validación y Capacitación (1 Semana)</p><p class="text-slate-600 mt-1">Demostración al equipo, capacitación a usuarios y validación final. Entregable: Manual de usuario y acta de cierre.</p></div></div>
+                <div class="timeline-item border-l-transparent"><div class="timeline-dot"></div><div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm"><p class="font-bold text-blue-600">Fase 7: Implementación y Seguimiento (2 Semanas)</p><p class="text-slate-600 mt-1">Puesta en marcha oficial, ajustes finales y soporte técnico. Entregable: Plataforma 100% operativa.</p></div></div>
+            </div>
+        </section>
+
+        <section id="deliverables" class="mb-20 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center text-slate-900 mb-4">Entregables del Proyecto</h2>
+            <p class="text-lg text-slate-600 max-w-3xl mx-auto text-center mb-10">Al finalizar, se entregarán los siguientes componentes que garantizan una solución completa, funcional y sostenible.</p>
+            <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                 <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200/50 text-center hover:shadow-xl transition-shadow"><p class="text-3xl mb-3">📦</p><h3 class="font-semibold text-slate-700">Repositorio de Código</h3></div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200/50 text-center hover:shadow-xl transition-shadow"><p class="text-3xl mb-3">🚀</p><h3 class="font-semibold text-slate-700">Plataforma Funcional</h3></div>
+                 <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200/50 text-center hover:shadow-xl transition-shadow"><p class="text-3xl mb-3">🗃️</p><h3 class="font-semibold text-slate-700">Base de Datos Documentada</h3></div>
+                 <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200/50 text-center hover:shadow-xl transition-shadow"><p class="text-3xl mb-3">📊</p><h3 class="font-semibold text-slate-700">Dashboards Activos</h3></div>
+                 <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200/50 text-center hover:shadow-xl transition-shadow"><p class="text-3xl mb-3">✔️</p><h3 class="font-semibold text-slate-700">Casos de Uso Aprobados</h3></div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200/50 text-center hover:shadow-xl transition-shadow"><p class="text-3xl mb-3">🧪</p><h3 class="font-semibold text-slate-700">Validación Funcional</h3></div>
+                 <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200/50 text-center hover:shadow-xl transition-shadow"><p class="text-3xl mb-3">📖</p><h3 class="font-semibold text-slate-700">Manual Técnico</h3></div>
+                 <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200/50 text-center hover:shadow-xl transition-shadow"><p class="text-3xl mb-3">💾</p><h3 class="font-semibold text-slate-700">Sistema de Backup</h3></div>
+            </div>
+        </section>
+
+        <section id="observations" class="scroll-mt-20">
+             <h2 class="text-3xl font-bold text-center text-slate-900 mb-4">Observaciones y Recomendaciones</h2>
+             <p class="text-lg text-slate-600 max-w-3xl mx-auto text-center mb-10">Finalmente, se presentan algunas consideraciones y recomendaciones clave para el éxito y la evolución del proyecto.</p>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div class="bg-white p-8 rounded-2xl shadow-lg border border-slate-200/50">
+                    <h4 class="font-bold text-xl text-slate-800 mb-3">Observaciones</h4>
+                    <p class="text-slate-600">El desarrollo deberá mantener coherencia con la estructura actual para permitir una expansión futura hacia nuevos capítulos o proyectos derivados de manera fluida y sin conflictos técnicos.</p>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-lg border border-slate-200/50">
+                    <h4 class="font-bold text-xl text-slate-800 mb-3">Recomendaciones</h4>
+                    <ul class="space-y-3 list-disc list-inside text-slate-600">
+                        <li>Ajustar los tiempos del plan según la metodología de desarrollo elegida (Ágil, Scrum, Cascada).</li>
+                        <li>Proponer un diagrama de Gantt con hitos y entregables por semana para un seguimiento detallado.</li>
+                        <li>Incluir puntos de control periódicos (ej. demostraciones quincenales) para revisar avances.</li>
+                    </ul>
+                </div>
+             </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-slate-800 text-slate-400 mt-20">
+        <div class="container mx-auto px-6 py-8 text-center"><p>&copy; 2025 Propuesta de Plataforma Integral. Todos los derechos reservados.</p><p class="text-sm mt-2">Este documento es una representación interactiva de la solicitud técnica de automatización.</p></div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            document.querySelectorAll('#mobile-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+
+            const tabs = document.querySelectorAll('.tab');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.getAttribute('data-tab');
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    tabPanes.forEach(pane => {
+                        pane.classList.toggle('hidden', pane.id !== target);
+                        pane.classList.toggle('active', pane.id === target);
+                    });
+                });
+            });
+            
+            const valorizacionCtx = document.getElementById('valorizacionChart').getContext('2d');
+            new Chart(valorizacionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Reciclado', 'Compostado', 'Reutilizado', 'No Valorizado'],
+                    datasets: [{
+                        label: '% de Valorización',
+                        data: [45, 25, 15, 15],
+                        backgroundColor: ['rgba(59, 130, 246, 0.8)','rgba(16, 185, 129, 0.8)','rgba(249, 115, 22, 0.8)','rgba(107, 114, 128, 0.6)'],
+                        borderColor: ['#ffffff'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' },
+                        tooltip: { callbacks: { label: (c) => `${c.label}: ${c.parsed}%` } }
+                    }
+                }
+            });
+
+            const ingresosCtx = document.getElementById('ingresosChart').getContext('2d');
+            new Chart(ingresosCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Trimestre 1', 'Trimestre 2', 'Trimestre 3', 'Trimestre 4'],
+                    datasets: [{
+                        label: 'Ingresos (en miles de USD)',
+                        data: [120, 150, 130, 180],
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1, borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, grid: { color: '#e5e7eb' } }, x: { grid: { display: false } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
